@@ -1,0 +1,41 @@
+body {
+    background-color: rgb(216, 216, 216);
+}
+
+.container-fluid {
+    margin-left: 5rem;
+    margin-right: 5rem;
+    margin-top: 2.5rem;
+}
+
+.row {
+    margin-top: 1rem;
+}
+
+.btn {
+    margin-right: 1rem;
+    margin-left: 1rem;
+    width: auto !important;
+}
+
+.list-group-item {
+    background-color: transparent;
+    font-size: 35px;
+}
+
+.dropdown-menu {         
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+input {
+    margin-left: 1rem;
+    background-color:rgba(0,0,0,0) !important;
+    border-color: black !important;
+    border-width: 0.75px !important;
+}
+
+input,
+.input-group {
+  width: 500px;
+}
