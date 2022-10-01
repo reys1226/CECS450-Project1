@@ -15,6 +15,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
+  <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+  <script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
 
   <link rel="stylesheet" href="../static/style.css">
   <title>World Anthem's Visualization</title>
@@ -27,14 +29,82 @@
 
   <div class="container-fluid">
     <div class="row">
-        <h1 class="w-100" style="font-size: 65px;">Wordcloud for {{ country }}'s Anthem</h1>
-        <h1 class="w-100" style="font-size: 65px;">{{alpha3}}</h1>
+        <h1 class="w-100" style="font-size: 65px;"><img src="data:image/jpeg;base64,{{ flag }}" alt="img_data"  id="imgslot"/> {{ country }}'s Anthem</h1>
     </div>
-    
-    <!-- Flag -->
-    <img src="data:image/jpeg;base64,{{ flag }}" alt="img_data"  id="imgslot"/>
-
   </div>
+
+    <!-- English Wordcloud -->
+    <div class="container-fluid" id="wordcloud"><p class="w-100 lead" style="font-size: 30px;">English translation:</p></div>
+    <br><br>
+    <!-- Transliteration Wordcloud -->
+    <div class="container-fluid" id="wordcloud-translit"><p class="w-100 lead" style="font-size: 30px;">Transliteration:</p></div>
+
+    <!-- English Code -->
+    <script>
+        anychart.onDocumentReady(function() {
+
+        // create data
+        var data = `{{eng}}` 
+
+        // create a tag (word) cloud chart
+        var chart = anychart.tagCloud();
+
+        // set the parsing mode
+        chart.data(data, {mode: "by-word"});
+
+        // set a chart title
+        chart.title("{{ country }}'s English Wordcloud")
+        // set an array of angles at which the words will be laid out
+        chart.angles([0])
+
+        // stlye
+        chart.hovered().fill("#1fadad");
+        chart.selected().fill("#1f66ad");
+        chart.hovered().stroke("#0f3357");
+        chart.selected().stroke("#0f3357");
+        chart.normal().fontWeight(500);
+        chart.background().stroke("2 gray");
+        chart.background().fill('#f0f0f0');
+
+        // display the word cloud chart
+        chart.container("wordcloud");
+        chart.draw();
+        });
+    </script>
+
+    <!-- Transliteration Code -->
+    <script>
+      anychart.onDocumentReady(function() {
+
+      // create data
+      var translitdata = `{{translit}}` 
+
+      // create a tag (word) cloud chart
+      var chart2 = anychart.tagCloud();
+
+      // set the parsing mode
+      chart2.data(translitdata, {mode: "by-word"});
+
+      // set a chart title
+      chart2.title("{{ country }}'s Transliteration Wordcloud")
+      // set an array of angles at which the words will be laid out
+      chart2.angles([0])
+
+      // stlye
+      chart2.hovered().fill("#1fadad");
+      chart2.selected().fill("#1f66ad");
+      chart2.hovered().stroke("#0f3357");
+      chart2.selected().stroke("#0f3357");
+      chart2.normal().fontWeight(500);
+      chart2.background().stroke("2 gray");
+      chart2.background().fill('#f0f0f0');
+
+      // display the word cloud chart
+      chart2.container("wordcloud-translit");
+      chart2.draw();
+      });
+    </script>
+
 </body>
 
 </html>

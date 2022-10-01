@@ -39,3 +39,17 @@ input,
 .input-group {
   width: 500px;
 }
+
+#wordcloud.container-fluid {
+    margin-left: 2.5rem !important;
+    margin-right: 2.5rem !important;
+    width: auto;
+    height: 400px;
+}
+
+#wordcloud-translit.container-fluid {
+    margin-left: 2.5rem !important;
+    margin-right: 2.5rem !important;
+    width: auto;
+    height: 400px;
+}
