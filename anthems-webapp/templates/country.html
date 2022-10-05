@@ -35,25 +35,21 @@
 
     <!-- English Wordcloud -->
     <div class="container-fluid" id="wordcloud"><p class="w-100 lead" style="font-size: 30px;">English translation:</p></div>
-    <br><br>
-    <!-- Transliteration Wordcloud -->
-    <div class="container-fluid" id="wordcloud-translit"><p class="w-100 lead" style="font-size: 30px;">Transliteration:</p></div>
 
     <!-- English Code -->
     <script>
         anychart.onDocumentReady(function() {
 
         // create data
-        var data = `{{eng}}` 
+        var data = anychart.data.set(JSON.parse('{{freqs|safe}}'));
+
+        console.log(data);
 
         // create a tag (word) cloud chart
-        var chart = anychart.tagCloud();
-
-        // set the parsing mode
-        chart.data(data, {mode: "by-word"});
+        var chart = anychart.tagCloud(data);
 
         // set a chart title
-        chart.title("{{ country }}'s English Wordcloud")
+        chart.title("{{ country }}'s Anthem Wordcloud")
         // set an array of angles at which the words will be laid out
         chart.angles([0])
 
@@ -69,42 +65,16 @@
         // display the word cloud chart
         chart.container("wordcloud");
         chart.draw();
+
+        // Listener that gets value
+        chart.listen("pointClick", function() {
+          var selected = chart.getSelectedPoints();
+          selected = selected[0];
+          idx = selected.getIndex();
+          row = data.row(idx)
+          console.log(row.x);
         });
+    });
     </script>
-
-    <!-- Transliteration Code -->
-    <script>
-      anychart.onDocumentReady(function() {
-
-      // create data
-      var translitdata = `{{translit}}` 
-
-      // create a tag (word) cloud chart
-      var chart2 = anychart.tagCloud();
-
-      // set the parsing mode
-      chart2.data(translitdata, {mode: "by-word"});
-
-      // set a chart title
-      chart2.title("{{ country }}'s Transliteration Wordcloud")
-      // set an array of angles at which the words will be laid out
-      chart2.angles([0])
-
-      // stlye
-      chart2.hovered().fill("#1fadad");
-      chart2.selected().fill("#1f66ad");
-      chart2.hovered().stroke("#0f3357");
-      chart2.selected().stroke("#0f3357");
-      chart2.normal().fontWeight(500);
-      chart2.background().stroke("2 gray");
-      chart2.background().fill('#f0f0f0');
-
-      // display the word cloud chart
-      chart2.container("wordcloud-translit");
-      chart2.draw();
-      });
-    </script>
-
 </body>
-
 </html>

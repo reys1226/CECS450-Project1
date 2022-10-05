@@ -6,6 +6,7 @@ from random import randrange
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import re
+import json
 
 app = Flask(__name__)
 app.secret_key = "key"
@@ -30,6 +31,18 @@ def remove_stopwords(anthem):
     filtered_sentence = [w for w in word_tokens if not w.lower() in stop_words]
     return ' '.join(filtered_sentence)
 
+def freq(str):
+    lst_dict = []
+    str_list = str.split()
+    unique_words = set(str_list)
+     
+    for word in unique_words :
+        dict = {}
+        dict['x'] = word
+        dict['value'] = str_list.count(word)
+        lst_dict.append(dict)
+    return lst_dict
+
 @app.route('/')
 def index():
     return render_template('index.html', countries=countries_list)
@@ -40,15 +53,17 @@ def random():
     name = df['country'][rand]
     alpha3, url, translit, eng, flag = get_country_info(name)
     eng = remove_stopwords(eng)
+    freqs = freq(eng)
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
 
 @app.route('/country/<name>')
 def country(name):
     alpha3, url, translit, eng, flag = get_country_info(name)    
     eng = remove_stopwords(eng)
+    freqs = freq(eng)
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
 
 @app.route('/search', methods=["GET","POST"])
 def search():
@@ -58,8 +73,9 @@ def search():
     name = df[df['alpha3'] == search_res].country.item()
     alpha3, url, translit, eng, flag = get_country_info(name)
     eng = remove_stopwords(eng)
+    freqs = json.dumps(freq(eng))
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
