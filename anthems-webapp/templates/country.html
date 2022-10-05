@@ -35,25 +35,29 @@
 
     <!-- English Wordcloud -->
     <div class="container-fluid" id="wordcloud"><p class="w-100 lead" style="font-size: 30px;">English translation:</p></div>
+    <!-- Code -->
+    <div class="container-fluid" style="margin-top: 5rem;">
+      <h2 id="word"></h2>
+      <div id="definitions">
+      </div>
+    </div>
 
     <!-- English Code -->
     <script>
         anychart.onDocumentReady(function() {
 
-        // create data
+        // Get data from python
         var data = anychart.data.set(JSON.parse('{{freqs|safe}}'));
 
-        console.log(data);
-
-        // create a tag (word) cloud chart
+        // Create a tag (word) cloud chart
         var chart = anychart.tagCloud(data);
 
-        // set a chart title
+        // Set a chart title
         chart.title("{{ country }}'s Anthem Wordcloud")
-        // set an array of angles at which the words will be laid out
+        // Set an array of angles at which the words will be laid out
         chart.angles([0])
 
-        // stlye
+        // Stlye
         chart.hovered().fill("#1fadad");
         chart.selected().fill("#1f66ad");
         chart.hovered().stroke("#0f3357");
@@ -62,17 +66,46 @@
         chart.background().stroke("2 gray");
         chart.background().fill('#f0f0f0');
 
-        // display the word cloud chart
+        // Display the word cloud chart
         chart.container("wordcloud");
         chart.draw();
 
-        // Listener that gets value
+        // Listener that gets the selected word
         chart.listen("pointClick", function() {
-          var selected = chart.getSelectedPoints();
-          selected = selected[0];
-          idx = selected.getIndex();
-          row = data.row(idx)
-          console.log(row.x);
+          var selected = chart.getSelectedPoints()[0];
+          word = data.row(selected.getIndex()).x;
+
+          document.getElementById('word').innerHTML = `Definition of "${word}"`;
+
+          // Add definition
+          let request = new XMLHttpRequest();
+          request.open("GET", `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+          request.send();
+          request.onload = () => {
+            if (request.status == 200) {
+              res = JSON.parse(request.response)
+              definitions = res[0].meanings;
+
+              document.getElementById('definitions').innerHTML = "";
+
+              for (let i = 0; i < definitions.length; i++) {
+                var pos = document.createElement('b');
+                pos.innerHTML = definitions[i].partOfSpeech;
+                var def = document.createElement('p')
+                def.innerHTML = definitions[i].definitions[0].definition;
+                document.getElementById('definitions').appendChild(pos);
+                document.getElementById('definitions').appendChild(def);
+              }
+            } else {
+              document.getElementById('definitions').innerHTML = "";
+              var def = document.createElement('p')
+              def.innerHTML = 'Error: Definition not found';
+              document.getElementById('definitions').appendChild(def);
+            }
+          }
+
+
+
         });
     });
     </script>
