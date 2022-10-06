@@ -15,6 +15,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
+  <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+  <script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
 
   <link rel="stylesheet" href="../static/style.css">
   <title>World Anthem's Visualization</title>
@@ -56,6 +58,97 @@
       <a href="/random" class="btn btn-outline-info" style="height: 40px;">Random</a>
     </div>
   </div>
+
+  <!-- Desmadre -->
+  <!-- English Wordcloud -->
+  <div class="container-fluid" id="wordcloud"></div>
+  <!-- Definitions -->
+  <div class="container-fluid">
+    <h2 id="word"></h2>
+    <div id="definitions">
+    </div>
+  </div>
+
+  <script>
+    anychart.onDocumentReady(function() {
+
+      // Get data from python
+      // var data = anychart.data.set(JSON.parse('{{ freqs|safe }}'));
+      var data = `{{ anthems }}`;
+
+      // Create a tag (word) cloud chart
+      chart = anychart.tagCloud();
+
+      // Add data
+      chart.data(data, {mode: 'by-word', maxItems: 100})
+
+      // Set a chart title
+      chart.title("World Anthems Wordcloud")
+
+      // Set an array of angles at which the words will be laid out
+      chart.angles([0])
+
+      // Stlye
+      // Hovered and selected style
+      chart.hovered().fill("#1fadad");
+      chart.selected().fill("#1f66ad");
+      chart.hovered().stroke("#0f3357");
+      chart.selected().stroke("#0f3357");
+      chart.normal().fontWeight(500);
+      chart.background().stroke("2 gray");
+      chart.background().fill('#f0f0f0');
+
+      // create and configure a color scale.
+      var customColorScale = anychart.scales.linearColor();
+      customColorScale.colors(["577590", "#7EBDC2", "#BB4430","#553A41","#FF9F1C"]);
+
+      // set the color scale as the color scale of the chart
+      chart.colorScale(customColorScale);
+
+      // add and configure a color range
+      chart.colorRange().enabled(true);
+      chart.colorRange().length("90%");
+
+      // Listener that gets the selected word
+      chart.listen("pointClick", function() {
+        var selected = chart.getSelectedPoints()[0];
+        // word = data.row(selected.getIndex()).x;
+
+        document.getElementById('word').innerHTML = `Definition of "${word}"`;
+
+        // Add definition
+        let request = new XMLHttpRequest();
+        request.open("GET", `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        request.send();
+        request.onload = () => {
+          if (request.status == 200) {
+            res = JSON.parse(request.response)
+            definitions = res[0].meanings;
+
+            document.getElementById('definitions').innerHTML = "";
+
+            for (let i = 0; i < definitions.length; i++) {
+              var pos = document.createElement('b');
+              pos.innerHTML = definitions[i].partOfSpeech;
+              var def = document.createElement('p')
+              def.innerHTML = definitions[i].definitions[0].definition;
+              document.getElementById('definitions').appendChild(pos);
+              document.getElementById('definitions').appendChild(def);
+            }
+          } else {
+            document.getElementById('definitions').innerHTML = "";
+            var def = document.createElement('p')
+            def.innerHTML = 'Error: Definition not found';
+            document.getElementById('definitions').appendChild(def);
+          }
+        }
+      });
+    
+      // Display the word cloud chart
+      chart.container("wordcloud");
+      chart.draw();
+    }); 
+  </script>
 </body>
 
 </html>

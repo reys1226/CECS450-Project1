@@ -13,6 +13,7 @@ app = Flask(__name__)
 app.secret_key = "key"
 
 df = pd.read_csv('static/clean_anthems.csv')
+all_anthems = ' '.join(df["english"])
 countries_list = list(df['country'].unique())
 
 def get_country_info(name):
@@ -46,7 +47,10 @@ def freq(str):
 
 @app.route('/')
 def index():
-    return render_template('index.html', countries=countries_list)
+    world_anthems = remove_stopwords(all_anthems)
+    freqs = freq(world_anthems)
+    freqs = json.dumps(freqs)
+    return render_template('index.html', countries=countries_list, freqs=freqs, anthems=world_anthems)
 
 @app.route('/random')
 def random():
@@ -57,13 +61,10 @@ def random():
     alpha3, url, translit, eng, flag = get_country_info(name)
     # Preparing the frequencies    
     eng_stop = remove_stopwords(eng)
-    freqs = json.dumps(freq(eng))
     freqs = freq(eng_stop)
-    max = len(freqs)
     freqs = json.dumps(freqs)
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs,
-    max=max)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
 
 @app.route('/country/<name>')
 def country(name):
@@ -72,11 +73,9 @@ def country(name):
     # Preparing the frequencies    
     eng_stop = remove_stopwords(eng)
     freqs = freq(eng_stop)
-    max = len(freqs)
     freqs = json.dumps(freqs)
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs,
-    max=max)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
 
 @app.route('/search', methods=["GET","POST"])
 def search():
@@ -90,11 +89,9 @@ def search():
     # Preparing the frequencies    
     eng_stop = remove_stopwords(eng)
     freqs = freq(eng_stop)
-    max = len(freqs)
     freqs = json.dumps(freqs)
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs,
-    max=max)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
