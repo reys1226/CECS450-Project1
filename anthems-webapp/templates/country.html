@@ -17,47 +17,72 @@
     crossorigin="anonymous"></script>
   <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
   <script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
+  
 
   <link rel="stylesheet" href="../static/style.css">
   <title>World Anthem's Visualization</title>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-    <a routerLink="/" class="navbar-brand" href="/" style="margin-left: 2rem;">World Anthem's Visualization</a>
+  <nav class="navbar navbar-expand-sm bg-dark navbar-dark justify-content-between">
+    <a routerLink="/" class="navbar-brand" href="/" style="margin-left: 0.5rem;">World Anthem's Visualization</a>
+    <!-- Dropdown -->
+    <div class="nav-item dropdown" style="margin-right: 0rem;">
+      <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Choose a country!
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        {% for country in countries %}
+          <a class="dropdown-item" href="/country/{{country}}">{{country}}</a>
+        {% endfor %}
+      </div>
+    </div>
   </nav>
 
   <div class="container-fluid">
-    <div class="row">
+    <div class="row" style="margin-bottom: 2rem;">
         <h1 class="w-100" style="font-size: 65px;"><img src="data:image/jpeg;base64,{{ flag }}" alt="img_data"  id="imgslot"/> {{ country }}'s Anthem</h1>
     </div>
   </div>
 
+    <!-- <div class="btn-group" role="group" style="margin-left: 5rem;"></div>
+      <button class="btn btn-info" type="button" onclick="setMode('spiral')" checked>Spiral</button>
+      <button class="btn btn-info" type="button" onclick="setMode('rect')">Rectangular</button>
+    </div> -->
     <!-- English Wordcloud -->
-    <div class="container-fluid" id="wordcloud"><p class="w-100 lead" style="font-size: 30px;">English translation:</p></div>
-    <!-- Code -->
-    <div class="container-fluid" style="margin-top: 5rem;">
+    <div class="container-fluid" id="wordcloud"></div>
+    <!-- Definitions -->
+    <div class="container-fluid">
       <h2 id="word"></h2>
       <div id="definitions">
       </div>
     </div>
+    <!-- Anthem -->
+    <div class="container-fluid">
+      <h2>Anthem:</h2>
+      <p id="anthem">{{ eng }}</p>
+    </div>
 
-    <!-- English Code -->
     <script>
-        anychart.onDocumentReady(function() {
+      anychart.onDocumentReady(function() {
 
         // Get data from python
         var data = anychart.data.set(JSON.parse('{{freqs|safe}}'));
 
         // Create a tag (word) cloud chart
-        var chart = anychart.tagCloud(data);
+        chart = anychart.tagCloud();
+
+        // Add data
+        chart.data(data)
 
         // Set a chart title
         chart.title("{{ country }}'s Anthem Wordcloud")
+
         // Set an array of angles at which the words will be laid out
         chart.angles([0])
 
         // Stlye
+        // Hovered and selected style
         chart.hovered().fill("#1fadad");
         chart.selected().fill("#1f66ad");
         chart.hovered().stroke("#0f3357");
@@ -66,9 +91,16 @@
         chart.background().stroke("2 gray");
         chart.background().fill('#f0f0f0');
 
-        // Display the word cloud chart
-        chart.container("wordcloud");
-        chart.draw();
+        // create and configure a color scale.
+        var customColorScale = anychart.scales.linearColor();
+        customColorScale.colors(["577590", "#7EBDC2", "#BB4430","#553A41","#FF9F1C"]);
+
+        // set the color scale as the color scale of the chart
+        chart.colorScale(customColorScale);
+
+        // add and configure a color range
+        chart.colorRange().enabled(true);
+        chart.colorRange().length("90%");
 
         // Listener that gets the selected word
         chart.listen("pointClick", function() {
@@ -76,6 +108,16 @@
           word = data.row(selected.getIndex()).x;
 
           document.getElementById('word').innerHTML = `Definition of "${word}"`;
+
+          // Highlight
+          // Code for highlight taken from: https://stackoverflow.com/questions/32130130/how-to-highlight-
+          // all-occurrences-of-a-word-on-a-page-with-javascript-or-jquery
+          var sentences = document.querySelector('#anthem');
+          var text = sentences.textContent;
+          console.log(text)
+          var regex = new RegExp('('+word+')', 'ig');
+          text = text.replace(regex, '<span class="highlight">$1</span>');
+          sentences.innerHTML = text;
 
           // Add definition
           let request = new XMLHttpRequest();
@@ -103,11 +145,27 @@
               document.getElementById('definitions').appendChild(def);
             }
           }
-
-
-
         });
-    });
+      
+        // Display the word cloud chart
+        chart.container("wordcloud");
+        chart.draw();
+      }); 
+      
+      // // set the mode of the tag cloud
+      // function setMode(mode) {
+      //   chart.mode(mode)
+      // }
+
+    </script>
+    <script>
+      var slider = document.getElementById("myRange");
+      var output = document.getElementById("demo");
+      output.innerHTML = slider.value;
+      
+      slider.oninput = function() {
+        output.innerHTML = this.value;
+      }
     </script>
 </body>
 </html>

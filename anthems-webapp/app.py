@@ -1,13 +1,13 @@
 from flask import Flask, render_template, request, redirect
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from random import randrange
+import pycountry as pc
 import pandas as pd
 import numpy as np
-import pycountry as pc
-from random import randrange
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-import re
-import json
 import requests
+import json
+import re
 
 app = Flask(__name__)
 app.secret_key = "key"
@@ -44,22 +44,6 @@ def freq(str):
         lst_dict.append(dict)
     return lst_dict
 
-def get_definitions(word):
-    res = requests.get(f'https://api.dictionaryapi.dev/api/v2/entries/en/{word}')
-    definitions = {}
-
-    if res.status_code == 200:
-        content = res.json()[0]
-        meanings = content['meanings']
-        for meaning in meanings:
-            type = meaning['partOfSpeech']
-            defn = meaning['definitions'][0]['definition']
-            definitions[type] = defn
-    else:
-        definitions['Error'] = '404' 
-
-    return definitions
-
 @app.route('/')
 def index():
     return render_template('index.html', countries=countries_list)
@@ -72,20 +56,27 @@ def random():
     # Getting country info 
     alpha3, url, translit, eng, flag = get_country_info(name)
     # Preparing the frequencies    
-    eng = remove_stopwords(eng)
+    eng_stop = remove_stopwords(eng)
     freqs = json.dumps(freq(eng))
+    freqs = freq(eng_stop)
+    max = len(freqs)
+    freqs = json.dumps(freqs)
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs,
+    max=max)
 
 @app.route('/country/<name>')
 def country(name):
     # Getting country info
     alpha3, url, translit, eng, flag = get_country_info(name)
     # Preparing the frequencies    
-    eng = remove_stopwords(eng)
-    freqs = json.dumps(freq(eng))
+    eng_stop = remove_stopwords(eng)
+    freqs = freq(eng_stop)
+    max = len(freqs)
+    freqs = json.dumps(freqs)
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs,
+    max=max)
 
 @app.route('/search', methods=["GET","POST"])
 def search():
@@ -97,13 +88,13 @@ def search():
     # Getting country info 
     alpha3, url, translit, eng, flag = get_country_info(name)
     # Preparing the frequencies    
-    eng = remove_stopwords(eng)
-    freqs = json.dumps(freq(eng))
-    # Else
-    #word = request.args.get('word', default=None, type=str)
-    word = 'cohort'
+    eng_stop = remove_stopwords(eng)
+    freqs = freq(eng_stop)
+    max = len(freqs)
+    freqs = json.dumps(freqs)
 
-    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs)
+    return render_template('country.html', country=name, alpha3=alpha3, flag=flag, eng=eng, translit=translit, freqs=freqs,
+    max=max)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

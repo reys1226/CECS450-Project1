@@ -5,11 +5,13 @@ body {
 .container-fluid {
     margin-left: 5rem;
     margin-right: 5rem;
-    margin-top: 2.5rem;
+    margin-top: 1.5rem;
+    width: auto;
 }
 
 .row {
     margin-top: 1rem;
+    margin-left: 1rem;
 }
 
 .btn {
@@ -25,6 +27,7 @@ body {
 
 .dropdown-menu {         
     max-height: 200px;
+    max-width: 200px;
     overflow-y: auto;
 }
 
@@ -41,15 +44,17 @@ input,
 }
 
 #wordcloud.container-fluid {
-    margin-left: 2.5rem !important;
-    margin-right: 2.5rem !important;
+    margin-left: 5rem !important;
+    margin-right: 5rem !important;
     width: auto;
     height: 400px;
 }
 
-#wordcloud-translit.container-fluid {
-    margin-left: 2.5rem !important;
-    margin-right: 2.5rem !important;
-    width: auto;
-    height: 400px;
+.slidecontainer {
+    margin-left:  -1rem;
+    margin-top: 1rem;
+}
+
+.highlight {
+    background-color: yellow;
 }

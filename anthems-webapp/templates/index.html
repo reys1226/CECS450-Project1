@@ -21,22 +21,30 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-    <a routerLink="/" class="navbar-brand" href="/" style="margin-left: 2rem;">World Anthem's Visualization</a>
+  <nav class="navbar navbar-expand-sm bg-dark navbar-dark justify-content-between">
+    <a routerLink="/" class="navbar-brand" href="/" style="margin-left: 0.5rem;">World Anthem's Visualization</a>
+    <!-- Dropdown -->
+    <div class="nav-item dropdown" style="margin-right: 0rem;">
+      <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Choose a country!
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        {% for country in countries %}
+          <a class="dropdown-item" href="/country/{{country}}">{{country}}</a>
+        {% endfor %}
+      </div>
+    </div>
   </nav>
-
   <div class="container-fluid">
     <div class="row">
       <div class="col d-flex flex-wrap">
         <h1 class="w-100" style="font-size: 65px;">Visualize any country anthem</h1>
-        <p class="w-100 lead" style="font-size: 30px;">If you need something to do. You've found the correct place. <br> Just
-          click whatever button you need.</p>
       </div>
     </div>
     <div class="row">
       <!-- Search -->
       <form action="/search" method="post">
-        <div class="input-group mb-3">
+        <div class="input-group mb-3" style="height: 40px;">
           <input class="form-control" type="text" placeholder="Search for a country!" 
           aria-label="default input example" id="search" name="search" aria-describedby="basic-addon2">
           <div class="input-group-append">
@@ -44,21 +52,8 @@
           </div>
         </div>
       </form>
-    </div>
-    <div class="row">
       <!-- Button -->
-      <a href="/random" class="btn btn-outline-info">Random</a>
-      <!-- Dropdown -->
-      <div class="dropdown">
-        <button class="btn btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Choose a country!
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          {% for country in countries %}
-            <a class="dropdown-item" href="/country/{{country}}">{{country}}</a>
-          {% endfor %}
-        </div>
-      </div>
+      <a href="/random" class="btn btn-outline-info" style="height: 40px;">Random</a>
     </div>
   </div>
 </body>
