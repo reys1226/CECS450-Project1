@@ -19,12 +19,12 @@
   <script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
 
   <link rel="stylesheet" href="../static/style.css">
-  <title>World Anthem's Visualization</title>
+  <title>Anthems of the World</title>
 </head>
 
 <body>
   <nav class="navbar navbar-expand-sm bg-dark navbar-dark justify-content-between">
-    <a routerLink="/" class="navbar-brand" href="/" style="margin-left: 0.5rem;">World Anthem's Visualization</a>
+    <a routerLink="/" class="navbar-brand" href="/" style="margin-left: 0.5rem;">Anthems of the World</a>
     <!-- Dropdown -->
     <div class="nav-item dropdown" style="margin-right: 0rem;">
       <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -37,13 +37,13 @@
       </div>
     </div>
   </nav>
-  <div class="container-fluid">
+  <div class="container-fluid" style="text-align: center;">
     <div class="row">
       <div class="col d-flex flex-wrap">
         <h1 class="w-100" style="font-size: 65px;">Visualize any country anthem</h1>
       </div>
     </div>
-    <div class="row">
+    <div class="row" style="display:flex; justify-content:center;">
       <!-- Search -->
       <form action="/search" method="post">
         <div class="input-group mb-3" style="height: 40px;">
@@ -59,9 +59,20 @@
     </div>
   </div>
 
-  <!-- Desmadre -->
+  <br><br>
+  <!-- Slider -->
+  <div class="container-fluid">
+    <h2>Rescale amount of words: <span id="sliderval"></span>%<button type="button" class="btn btn-dark" onclick="rescale($('#myRange').val())">Set words</button></h2>
+    <b>Showing <span id="wordcount">200</span> words</b>    
+    <div class="slidecontainer">
+      <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+    </div>
+  </div>
   <!-- English Wordcloud -->
-  <div class="container-fluid" id="wordcloud"></div>
+  <div class="container-fluid" id="wordcloud">
+    <div id="cloud">
+    </div>
+  </div>
   <!-- Definitions -->
   <div class="container-fluid">
     <h2 id="word"></h2>
@@ -70,7 +81,9 @@
   </div>
 
   <script>
-    anychart.onDocumentReady(function() {
+    anychart.onDocumentReady(draw());
+    
+    function draw(items=200) {
 
       // Get data from python
       // var data = anychart.data.set(JSON.parse('{{ freqs|safe }}'));
@@ -80,7 +93,7 @@
       chart = anychart.tagCloud();
 
       // Add data
-      chart.data(data, {mode: 'by-word', maxItems: 100})
+      chart.data(data, {mode: 'by-word', maxItems: items})
 
       // Set a chart title
       chart.title("World Anthems Wordcloud")
@@ -109,45 +122,39 @@
       chart.colorRange().enabled(true);
       chart.colorRange().length("90%");
 
-      // Listener that gets the selected word
-      chart.listen("pointClick", function() {
-        var selected = chart.getSelectedPoints()[0];
-        // word = data.row(selected.getIndex()).x;
-
-        document.getElementById('word').innerHTML = `Definition of "${word}"`;
-
-        // Add definition
-        let request = new XMLHttpRequest();
-        request.open("GET", `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-        request.send();
-        request.onload = () => {
-          if (request.status == 200) {
-            res = JSON.parse(request.response)
-            definitions = res[0].meanings;
-
-            document.getElementById('definitions').innerHTML = "";
-
-            for (let i = 0; i < definitions.length; i++) {
-              var pos = document.createElement('b');
-              pos.innerHTML = definitions[i].partOfSpeech;
-              var def = document.createElement('p')
-              def.innerHTML = definitions[i].definitions[0].definition;
-              document.getElementById('definitions').appendChild(pos);
-              document.getElementById('definitions').appendChild(def);
-            }
-          } else {
-            document.getElementById('definitions').innerHTML = "";
-            var def = document.createElement('p')
-            def.innerHTML = 'Error: Definition not found';
-            document.getElementById('definitions').appendChild(def);
-          }
-        }
-      });
-    
       // Display the word cloud chart
-      chart.container("wordcloud");
+      // set the container id
+      // Example taken from:
+      // https://stackoverflow.com/questions/61433722/how-can-i-dynamically-set-maxitems-for-my-word-cloud
+      document.getElementById("cloud").remove();
+
+      var cloud = document.createElement("div");
+      cloud.id = "cloud";
+      document.getElementById("wordcloud").appendChild(cloud);
+
+      chart.container("cloud");
+
+
       chart.draw();
-    }); 
+      }
+  </script>
+  <script>
+    var slider = document.getElementById("myRange");
+    var output = document.getElementById("sliderval");
+    output.innerHTML = slider.value; // Display the default slider value
+
+    // Update the current slider value (each time you drag the slider handle)
+    slider.oninput = function() {
+      output.innerHTML = this.value;
+    }
+
+    function rescale(x) {
+      // var max = '{{max}}';
+      var max = 400
+      items = Math.floor(max * (x/100))
+      document.getElementById("wordcount").innerHTML = items;
+      draw(items);
+    }
   </script>
 </body>
 

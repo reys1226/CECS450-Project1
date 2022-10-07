@@ -49,8 +49,10 @@ def freq(str):
 def index():
     world_anthems = remove_stopwords(all_anthems)
     freqs = freq(world_anthems)
+    max = len(freqs)
     freqs = json.dumps(freqs)
-    return render_template('index.html', countries=countries_list, freqs=freqs, anthems=world_anthems)
+
+    return render_template('index.html', countries=countries_list, freqs=freqs, anthems=world_anthems, max=max)
 
 @app.route('/random')
 def random():
